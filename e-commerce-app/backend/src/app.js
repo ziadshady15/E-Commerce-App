@@ -13,6 +13,7 @@ app.use(cors());
 app.use(morgan("dev"));
 
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/products", require("./routes/products")); 
 
 app.get("/", (req, res) => {
   res.send("API Running...");
