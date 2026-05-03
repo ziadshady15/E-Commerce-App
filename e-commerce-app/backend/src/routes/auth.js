@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const register = require("../controllers/authlogic");
-const login = require("../controllers/authlogic");
 
+const { register, login } = require("../controllers/authlogic");
 router.post("/register", register);
 router.post("/login", login);
 
