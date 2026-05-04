@@ -21,7 +21,9 @@ app.use(morgan("dev"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/categories", require("./routes/category"));
 app.use("/api/products", require("./routes/products")); 
+app.use("/api/cart", require("./routes/cart")); 
 app.use("/api/users", require("./routes/users"));
+
 
 app.get("/", (req, res) => {
   res.send("API Running...");
