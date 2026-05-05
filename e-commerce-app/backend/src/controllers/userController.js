@@ -4,9 +4,7 @@ const bcrypt = require("bcrypt");
 const PEPPER = "mysecretpepper"; 
 const SALT_ROUNDS = 10; 
 
-// @desc    Get user profile
-// @route   GET /api/users/profile
-// @access  Private
+
 const getProfile = async (req, res, next) => {
   try {
     // Beygeeb bayanat el user el 7aly mn el id elly gay mn el protect middleware
@@ -22,9 +20,6 @@ const getProfile = async (req, res, next) => {
   }
 };
 
-// @desc    Update user profile
-// @route   PUT /api/users/profile
-// @access  Private
 const updateProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -53,9 +48,6 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-// @desc    Get all users
-// @route   GET /api/users/
-// @access  Private/Admin
 const getAllUsers = async (req, res, next) => {
   try {
     // Beyraga3 kol el users (lel admin bas) w mafish da3y neraga3 el password
@@ -66,9 +58,6 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-// @desc    Delete user
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
 const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
