@@ -22,7 +22,9 @@ import Cart         from "./pages/Cart";
 import Checkout     from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import Profile      from "./pages/Profile";
-
+import Contact from "./pages/contact";
+import Privacy from "./pages/privacy";
+import Terms   from "./pages/terms";
 // Admin Pages (must be logged in AND role === "admin")
 import AdminLayout  from "./pages/AdminLayout";
 
@@ -46,7 +48,9 @@ function AppContent() {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/login"       element={<Login />} />
         <Route path="/register"    element={<Register />} />
-
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms"   element={<Terms />} />
         {/* ── Protected Routes (login required) ─────── */}
         <Route element={<ProtectedRoute />}>
           <Route path="/cart"          element={<Cart />} />
