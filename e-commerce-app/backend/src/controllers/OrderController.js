@@ -11,7 +11,7 @@ const checkout = async (req, res, next) => {
     }
 
     const orderItems = cart.items.map((item) => ({
-      prodesuct:  item.product._id,
+      product:  item.product._id,
       quantity: item.quantity,
       price:    item.product.price,
     }));  //n5aly items array -> order items

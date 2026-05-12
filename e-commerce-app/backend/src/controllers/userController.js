@@ -32,10 +32,23 @@ const updateProfile = async (req, res, next) => {
     if (req.body.name) user.name = req.body.name;
     if (req.body.email) user.email = req.body.email;
 
-    // Law el user ba3et password gedid, ben3mel hash be nafs tariqet el Register[cite: 10]
-    if (req.body.password) {
-      user.password = await bcrypt.hash(req.body.password + PEPPER, SALT_ROUNDS); //[cite: 10]
+    // --- NEW PASSWORD LOGIC ---
+    if (req.body.newPassword) {
+      // 1. Check if the user provided their old password
+      if (!req.body.oldPassword) {
+        return res.status(400).json({ message: "Current password is required to set a new one." });
+      }
+
+      // 2. Verify the old password matches what is in the database
+      const isMatch = await bcrypt.compare(req.body.oldPassword + PEPPER, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Incorrect current password." });
+      }
+
+      // 3. Hash and set the new password
+      user.password = await bcrypt.hash(req.body.newPassword + PEPPER, SALT_ROUNDS);
     }
+    // --------------------------
 
     const updatedUser = await user.save();
 
