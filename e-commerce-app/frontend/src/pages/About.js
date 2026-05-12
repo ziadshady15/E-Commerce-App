@@ -1,64 +1,84 @@
 function About() {
   return (
-    <div>
-      {/* Hero */}
-      <div style={{ background: "var(--dark)", color: "var(--white)" }} className="py-5 px-4 px-md-5">
-        <span className="eyebrow" style={{ color: "rgba(255,255,255,0.5)" }}>Our Story</span>
-        <h2 className="serif mb-3" style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}>
-          The Art of Preservation Since 2014
-        </h2>
-        <p style={{ color: "rgba(255,255,255,0.7)", maxWidth: 480, lineHeight: 1.8 }}>
-          ArtFrame was founded on a single belief: that the frame around a piece of art is as important as the art itself.
-        </p>
-      </div>
-
-      {/* Mission */}
-      <div style={{ background: "var(--white)" }} className="py-5">
-        <div className="container">
-          <div className="row g-5 align-items-center">
-            <div className="col-12 col-md-6">
-              <span className="eyebrow">Our Mission</span>
-              <h3 className="section-title mb-3">Curating the Final Moment</h3>
-              <p className="text-muted mb-3" style={{ lineHeight: 1.9, fontSize: "0.9rem" }}>
-                We believe that art deserves to be preserved with the same intention and care that went into creating it.
-                Our studio works with sustainably sourced materials from around the world.
-              </p>
-              <p className="text-muted" style={{ lineHeight: 1.9, fontSize: "0.9rem" }}>
-                Each frame is hand-assembled by our team of master craftspeople, using museum-grade acrylic
-                and acid-free mounting boards that protect art for generations.
-              </p>
-            </div>
-            <div className="col-12 col-md-6">
-              <div
-                style={{ background: "var(--cream)", aspectRatio: "1", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "4rem" }}
-              >🎨</div>
-            </div>
+    <section className="py-5" style={{ background: "var(--white)" }}>
+      <div className="container">
+        
+        {/* Story / Hero Section */}
+        <div className="row mb-5 pb-4 border-bottom">
+          <div className="col-12 col-lg-8">
+            <span className="eyebrow text-muted" style={{ letterSpacing: "2px", textTransform: "uppercase", fontSize: "0.8rem" }}>
+              Our Story
+            </span>
+            <h2 className="serif mb-4 mt-2" style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)", color: "var(--dark)" }}>
+              Welcome to ArtFrame
+            </h2>
+            <p className="text-muted" style={{ fontSize: "1.1rem", lineHeight: 1.8 }}>
+              Our journey into the visual arts began with a shared curiosity for how a digital spark can transform into a lasting impression. What started as an exploration of design has evolved over the past four years into a global practice focused on clarity and impact.
+            </p>
+            <p className="text-muted" style={{ fontSize: "1.1rem", lineHeight: 1.8 }}>
+              ArtFrame is the realization of that evolution. Here, we believe that art is more than just an image—it is a physical experience. By blending modern creative techniques with the timeless principles of preservation, we deliver original works designed to inhabit your space for a lifetime.
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Values */}
-      <div style={{ background: "var(--cream)" }} className="py-5">
-        <div className="container">
-          <h3 className="section-title text-center mb-5">Our Values</h3>
-          <div className="row g-3">
-            {[
-              { icon: "🌿", title: "Sustainability",   desc: "All wood is FSC-certified and responsibly sourced from managed forests." },
-              { icon: "🔬", title: "Museum Quality",   desc: "We use the same materials trusted by major art institutions worldwide." },
-              { icon: "✋", title: "Handcrafted",      desc: "Every frame is assembled by hand and inspected before leaving our studio." },
-            ].map((v) => (
-              <div className="col-12 col-md-4" key={v.title}>
-                <div style={{ background: "var(--white)", border: "1px solid var(--border)", padding: "32px", height: "100%" }}>
-                  <p style={{ fontSize: "2rem", marginBottom: 12 }}>{v.icon}</p>
-                  <h5 className="serif mb-2">{v.title}</h5>
-                  <p className="text-muted mb-0" style={{ lineHeight: 1.8, fontSize: "0.85rem" }}>{v.desc}</p>
-                </div>
+        {/* Mission Section */}
+        <div className="row g-5 align-items-center mb-5 pb-4 border-bottom">
+          <div className="col-12 col-md-6 order-2 order-md-1">
+            <img 
+              src="/cars.WEBP" 
+              alt="ArtFrame museum-grade preservation process" 
+              style={{ 
+                width: "75%", 
+                aspectRatio: "4:5", /* <-- Changed from "1" to "4/5" for the tall rectangle look */
+                objectFit: "cover", 
+                backgroundColor: "var(--cream)" // Acts as a fallback color while loading
+              }} 
+            />
+          </div>
+          <div className="col-12 col-md-6 order-1 order-md-2">
+            <span className="eyebrow text-muted" style={{ letterSpacing: "2px", textTransform: "uppercase", fontSize: "0.8rem" }}>
+              Our Mission
+            </span>
+            <h3 className="section-title mb-3 mt-2 serif" style={{ color: "var(--dark)" }}>
+              Curating the Final Moment
+            </h3>
+            <p className="text-muted mb-3" style={{ lineHeight: 1.9, fontSize: "0.95rem" }}>
+              We believe that art deserves to be preserved with the same intention and care that went into creating it. Our studio works with sustainably sourced materials from around the world.
+            </p>
+            <p className="text-muted" style={{ lineHeight: 1.9, fontSize: "0.95rem" }}>
+              Each frame is hand-assembled by our team of master craftspeople, using museum-grade acrylic and acid-free mounting boards that protect art for generations.
+            </p>
+          </div>
+        </div>
+
+        {/* Values Section */}
+        <div className="row g-4">
+          <div className="col-12 mb-2">
+            <span className="eyebrow text-muted" style={{ letterSpacing: "2px", textTransform: "uppercase", fontSize: "0.8rem" }}>
+              Our Principles
+            </span>
+            <h3 className="section-title mt-2 serif" style={{ color: "var(--dark)" }}>
+              Why Choose ArtFrame
+            </h3>
+          </div>
+          {[
+            { icon: "🚚", title: "Fast Shipping",     desc: "Delivery within 4 days!" },
+            { icon: "🖼️", title: "Anti-Pixelation",   desc: "High-resolution prints with sharp details." },
+            { icon: "🎨", title: "Original Artwork",  desc: "Original Designs you won't find anywhere else." },
+            { icon: "📦", title: "Premium Packaging", desc: "Secure & stylish packaging for perfect delivery." }
+          ].map((v) => (
+            <div className="col-12 col-md-6 col-lg-3" key={v.title}>
+              <div style={{ background: "var(--cream)", border: "1px solid var(--border)", padding: "32px", height: "100%" }}>
+                <p style={{ fontSize: "2rem", marginBottom: 12 }}>{v.icon}</p>
+                <h5 className="serif mb-2" style={{ color: "var(--dark)", fontSize: "1.1rem" }}>{v.title}</h5>
+                <p className="text-muted mb-0" style={{ lineHeight: 1.6, fontSize: "0.85rem" }}>{v.desc}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+
       </div>
-    </div>
+    </section>
   );
 }
 

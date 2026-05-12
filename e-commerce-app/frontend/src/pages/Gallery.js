@@ -1,187 +1,292 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = "http://localhost:5000/api";
+
+// Skeleton card for loading state
+function SkeletonCard() {
+  return (
+    <div className="col-6 col-md-4">
+      <div className="skeleton-card">
+        <div className="skeleton-img skeleton-pulse" />
+        <div className="skeleton-body">
+          <div className="skeleton-line skeleton-pulse" style={{ width: "70%" }} />
+          <div className="skeleton-line skeleton-pulse" style={{ width: "40%", marginTop: 6 }} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Gallery() {
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);   // full list, fetched once
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [sortBy, setSortBy] = useState("default");
+  const [searchTyped, setSearchTyped] = useState("");
 
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
+  const selectedCategory = searchParams.get("category") || "";
+  const searchQuery = searchParams.get("search") || "";
+  const sortBy = searchParams.get("sort") || "default";
+
+  // Sync typed search with URL param on mount
   useEffect(() => {
-    const catFromUrl = searchParams.get("category");
-    if (catFromUrl) setSelectedCategory(catFromUrl);
-    fetchCategories();
-  }, []);
+    setSearchTyped(searchQuery);
+  }, []); // eslint-disable-line
 
-  useEffect(() => { fetchProducts(); }, [search, selectedCategory]);
-
-  const fetchProducts = async () => {
+  // ✅ Single parallel fetch — runs ONCE on mount
+  useEffect(() => {
     setLoading(true);
-    setError(null);
-    try {
-      let url = `${API_URL}/products?`;
-      if (search) url += `search=${encodeURIComponent(search)}&`;
-      if (selectedCategory) url += `category=${selectedCategory}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to load products.");
-      setProducts(await res.json());
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    Promise.all([
+      fetch(API_URL + "/categories").then((r) => {
+        if (!r.ok) throw new Error("categories");
+        return r.json();
+      }),
+      fetch(API_URL + "/products").then((r) => {
+        if (!r.ok) throw new Error("products");
+        return r.json();
+      }),
+    ])
+      .then(([cats, prods]) => {
+        setCategories(cats);
+        setAllProducts(prods);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Could not load products. Please try again.");
+        setLoading(false);
+      });
+  }, []); // ← only on mount; no more re-fetches on filter change
+
+  const updateUrl = (key, value) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) newParams.set(key, value);
+    else newParams.delete(key);
+    setSearchParams(newParams, { replace: true });
+  };
+
+  // ✅ Client-side filter + sort — no network calls
+  const finalProducts = useMemo(() => {
+    let list = [...allProducts];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.name?.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q)
+      );
     }
-  };
 
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch(`${API_URL}/categories`);
-      if (res.ok) setCategories(await res.json());
-    } catch {}
-  };
+    if (selectedCategory) {
+      list = list.filter(
+        (p) =>
+          p.category === selectedCategory ||
+          p.category?._id === selectedCategory
+      );
+    }
 
-  const getSorted = () => {
-    const sorted = [...products];
-    if (sortBy === "price-asc")  return sorted.sort((a, b) => a.price - b.price);
-    if (sortBy === "price-desc") return sorted.sort((a, b) => b.price - a.price);
-    if (sortBy === "name")       return sorted.sort((a, b) => a.name.localeCompare(b.name));
-    return sorted;
-  };
+    if (sortBy === "price-asc") list.sort((a, b) => a.price - b.price);
+    else if (sortBy === "price-desc") list.sort((a, b) => b.price - a.price);
+    else if (sortBy === "name") list.sort((a, b) => a.name.localeCompare(b.name));
 
-  const sorted = getSorted();
+    return list;
+  }, [allProducts, searchQuery, selectedCategory, sortBy]);
 
   return (
-    <div className="container py-4 py-md-5">
-      {/* Breadcrumb */}
-      <nav aria-label="breadcrumb" className="mb-3">
-        <ol className="breadcrumb" style={{ fontSize: "0.75rem" }}>
-          <li className="breadcrumb-item">
-            <span onClick={() => navigate("/")} style={{ cursor: "pointer", color: "var(--gray)" }}>Home</span>
-          </li>
-          <li className="breadcrumb-item active">Gallery</li>
-        </ol>
-      </nav>
+    <div className="container py-5">
+      <style>{`
+        /* ── Product cards ── */
+        .product-card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border: 1px solid #eee !important;
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: pointer;
+        }
+        .product-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+          border-color: #333 !important;
+        }
+        .img-container { overflow: hidden; }
+        .product-card img {
+          transition: transform 0.5s ease;
+        }
+        .product-card:hover img { transform: scale(1.08); }
 
-      <div className="row g-4">
-        {/* ── Sidebar Filters ── */}
-        <div className="col-12 col-md-3">
-          <p className="eyebrow fw-semibold">Filters</p>
-          <p className="eyebrow mb-3">Refine Your Selection</p>
+        /* ── Skeleton loading ── */
+        .skeleton-card {
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #eee;
+          background: #fff;
+        }
+        .skeleton-img {
+          height: 280px;
+          background: #e9e9e9;
+        }
+        .skeleton-body {
+          padding: 12px;
+        }
+        .skeleton-line {
+          height: 12px;
+          border-radius: 4px;
+          background: #e9e9e9;
+        }
+        @keyframes shimmer {
+          0%   { opacity: 1; }
+          50%  { opacity: 0.4; }
+          100% { opacity: 1; }
+        }
+        .skeleton-pulse {
+          animation: shimmer 1.4s ease-in-out infinite;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+          text-align: center;
+          padding: 60px 20px;
+          color: #999;
+        }
+        .empty-state h5 { color: #555; margin-bottom: 8px; }
+      `}</style>
+
+      <div className="row">
+        {/* Sidebar */}
+        <div className="col-md-3">
+          <h5 className="mb-4 serif">Filters</h5>
 
           {/* Search */}
-          <div className="mb-3">
-            <label className="af-label">Search</label>
-            <input
-              type="text"
-              className="af-input"
-              placeholder="Search frames..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="mb-4">
+            <label className="small fw-bold text-muted mb-2">SEARCH</label>
+            <div className="d-flex gap-2">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                placeholder="Search frames..."
+                value={searchTyped}
+                onChange={(e) => setSearchTyped(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && updateUrl("search", searchTyped)
+                }
+              />
+              <button
+                className="btn btn-dark btn-sm"
+                onClick={() => updateUrl("search", searchTyped)}
+              >
+                Search
+              </button>
+            </div>
           </div>
 
-          <hr style={{ borderColor: "var(--border)" }} />
-
-          {/* Category */}
-          <p className="af-label mt-3">Category</p>
-          {[{ _id: "", name: "All" }, ...categories].map((cat) => (
-            <div key={cat._id} className="form-check mb-1">
-              <input
-                className="form-check-input"
-                type="radio"
-                id={`cat-${cat._id}`}
-                name="category"
-                checked={selectedCategory === cat._id}
-                onChange={() => setSelectedCategory(cat._id)}
-              />
-              <label className="form-check-label" htmlFor={`cat-${cat._id}`} style={{ fontSize: "0.85rem" }}>
-                {cat.name}
-              </label>
-            </div>
-          ))}
+          {/* Collections */}
+          <div className="mb-4">
+            <label className="small fw-bold text-muted mb-2">COLLECTIONS</label>
+            {[{ _id: "", name: "All Collections" }, ...categories].map((cat) => (
+              <div className="form-check" key={cat._id || "all"}>
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="cat"
+                  checked={selectedCategory === cat._id}
+                  onChange={() => updateUrl("category", cat._id)}
+                />
+                <label className="form-check-label small">{cat.name}</label>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* ── Products ── */}
-        <div className="col-12 col-md-9">
-          <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <h4 className="serif mb-0">Available Frames</h4>
+        {/* Grid */}
+        <div className="col-md-9">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h3 className="serif">
+              The Gallery{" "}
+              {!loading && (
+                <span className="fs-6 text-muted fw-normal">
+                  ({finalProducts.length} piece{finalProducts.length !== 1 ? "s" : ""})
+                </span>
+              )}
+            </h3>
             <select
-              className="af-input"
-              style={{ width: "auto" }}
+              className="form-select w-auto form-select-sm"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => updateUrl("sort", e.target.value)}
             >
-              <option value="default">Popularity</option>
+              <option value="default">Sort By</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
               <option value="name">Name A–Z</option>
             </select>
           </div>
 
-          {error && <div className="alert alert-danger" style={{ borderRadius: 0 }}>{error}</div>}
+          {/* Error */}
+          {error && (
+            <div className="alert alert-danger">{error}</div>
+          )}
 
-          {loading ? (
-            <div className="row g-3">
-              {[1, 2, 3, 4, 5, 6].map((n) => (
-                <div className="col-12 col-sm-6 col-md-4" key={n}>
-                  <div className="skeleton" style={{ height: 220 }}></div>
-                  <div className="skeleton mt-2" style={{ height: 14 }}></div>
+          {/* Loading skeletons */}
+          {loading && (
+            <div className="row g-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          )}
+
+          {/* Products grid */}
+          {!loading && !error && finalProducts.length > 0 && (
+            <div className="row g-4">
+              {finalProducts.map((p) => (
+                <div className="col-6 col-md-4" key={p._id}>
+                  <div
+                    className="card h-100 product-card border-0 bg-white"
+                    onClick={() => navigate("/product/" + p._id)}
+                  >
+                    <div className="img-container">
+                      <img
+                        src={p.image}
+                        className="card-img-top"
+                        alt={p.name}
+                        loading="lazy"                  // ✅ lazy load
+                        decoding="async"                // ✅ non-blocking decode
+                        style={{ height: "280px", objectFit: "cover" }}
+                      />
+                    </div>
+                    <div className="card-body text-center">
+                      <h6
+                        className="mb-1 text-uppercase small fw-bold"
+                        style={{ letterSpacing: "1px" }}
+                      >
+                        {p.name}
+                      </h6>
+                      <p className="text-muted small mb-0">{p.price} EGP</p>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-          ) : sorted.length === 0 ? (
-            <div className="text-center py-5">
-              <h5>No frames found</h5>
-              <p className="text-muted mb-3">Try adjusting your search or filters</p>
-              <button className="btn-af-outline btn-af-sm" onClick={() => { setSearch(""); setSelectedCategory(""); }}>
+          )}
+
+          {/* Empty state */}
+          {!loading && !error && finalProducts.length === 0 && (
+            <div className="empty-state">
+              <h5>No pieces found</h5>
+              <p className="small">Try adjusting your filters or search term.</p>
+              <button
+                className="btn btn-outline-dark btn-sm mt-2"
+                onClick={() => {
+                  setSearchTyped("");
+                  setSearchParams({});
+                }}
+              >
                 Clear Filters
               </button>
             </div>
-          ) : (
-            <>
-              <div className="row g-3">
-                {sorted.map((p) => (
-                  <div className="col-12 col-sm-6 col-md-4" key={p._id}>
-                    <div
-                      className="af-card"
-                      onClick={() => navigate(`/product/${p._id}`)}
-                      style={{ cursor: "pointer" }}
-                    >
-                     
-                    <div style={{ position: "relative", width: "100%", paddingBottom: "133%" }}>
-                        {p.image
-                          ? <img
-                              src={p.image}
-                              alt={p.name}
-                              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-                            />
-                          : <div style={{ position: "absolute", inset: 0, background: "#f0ece6" }}></div>
-                        }
-                      </div>
-                      <div className="p-3">
-                        <div className="d-flex justify-content-between">
-                          <span style={{ fontWeight: 500, maxWidth: "65%", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{p.name}</span>
-                          <span style={{ fontWeight: 700 }}>{p.price} EGP</span>
-                        </div>
-                        <p className="text-muted mb-0" style={{ fontSize: "0.75rem" }}>
-                          {[p.material, p.category?.name].filter(Boolean).join(" · ")}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <p className="text-center text-muted mt-4" style={{ fontSize: "0.75rem" }}>
-                Showing {sorted.length} frame{sorted.length !== 1 ? "s" : ""}
-              </p>
-            </>
           )}
         </div>
       </div>

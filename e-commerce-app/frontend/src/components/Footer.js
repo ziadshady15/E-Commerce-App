@@ -14,8 +14,8 @@ function Footer() {
 
           {[
             { title: "Shop",    links: [{ label: "Gallery",     to: "/gallery" },     { label: "Collections", to: "/collections" }] },
-            { title: "Company", links: [{ label: "About",       to: "/about" },       { label: "Contact",     to: "#" }] },
-            { title: "Legal",   links: [{ label: "Privacy",     to: "#" },            { label: "Terms",       to: "#" }] },
+            { title: "Company", links: [{ label: "About",       to: "/about" },       { label: "Contact",     to: "/contact" }] },
+            { title: "Legal",   links: [{ label: "Privacy",     to: "/privacy" },            { label: "Terms",       to: "/terms" }] },
           ].map((col) => (
             <div className="col-6 col-md-2" key={col.title}>
               <p className="eyebrow fw-semibold mb-2">{col.title}</p>
