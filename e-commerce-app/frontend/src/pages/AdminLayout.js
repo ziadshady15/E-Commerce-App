@@ -1,6 +1,6 @@
 import { useState } from "react";// hook 3lshan y3ml traack le application state function bta5od el current state we el state ely 3awza trohlha
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";//3lshan el logout
+import { useAuth } from "../context/AuthContext";
 import AdminOverview from "./AdminOverview";
 import AdminProducts from "./AdminProducts";
 import AdminOrders   from "./AdminOrders";
@@ -41,7 +41,7 @@ function AdminLayout() {
       <aside className="admin-sidebar">
         <div className="p-3" style={{ borderBottom: "1px solid var(--border)" }}>
           <p className="serif mb-0" style={{ fontStyle: "italic" }}>Admin Panel</p>
-          <small className="text-muted">RR Store</small>
+          <small className="text-muted"> Art Frame</small>
         </div>
         
         {NAV_ITEMS.map((item) => (

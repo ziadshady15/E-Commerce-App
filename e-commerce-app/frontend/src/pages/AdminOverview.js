@@ -61,7 +61,7 @@ function AdminOverview() {
     //row da mwgood fl bootstrap g-3 3lshan el columns yb2a feha gap benhom we mb-4 da margin bottom 4 3lshan yb2a feha space benha we ben ely tahteha 
     <div>
       <h4 className="serif mb-1">Dashboard Overview</h4>
-      <p className="text-muted mb-4" style={{ fontSize: "0.85rem" }}>Welcome to the RR Store admin panel.</p>
+      <p className="text-muted mb-4" style={{ fontSize: "0.85rem" }}>Welcome to the Artframe admin panel.</p>
       
       <div className="row g-3 mb-4">
         {stats.map((stat) => (
