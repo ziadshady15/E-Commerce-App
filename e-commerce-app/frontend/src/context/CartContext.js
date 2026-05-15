@@ -26,9 +26,7 @@ function CartProvider({ children }) {
       const data = await res.json();
       setCart(data);
       setCartCount(data.items ? data.items.length : 0);
-    } catch (err) {
-      console.error("Failed to fetch cart:", err);
-    }
+    } catch (err) {}
   };
 
   const addToCart = async (productId, quantity = 1) => {
@@ -42,12 +40,36 @@ function CartProvider({ children }) {
         body: JSON.stringify({ productId, quantity }),
       });
       const data = await res.json();
+      
+      if (!res.ok) {
+        return { success: false, message: data.message || "Failed to update" };
+      }
+
       setCart(data);
       setCartCount(data.items ? data.items.length : 0);
       return { success: true };
     } catch (err) {
       return { success: false, message: err.message };
     }
+  };
+
+  const updateQuantity = async (productId, newQuantity) => {
+    try {
+      const res = await fetch(`${API_URL}/cart/${productId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity: newQuantity }),
+      });
+      const data = await res.json();
+      
+      if (!res.ok) return;
+
+      setCart(data);
+      setCartCount(data.items ? data.items.length : 0);
+    } catch (err) {}
   };
 
   const removeFromCart = async (productId) => {
@@ -59,9 +81,7 @@ function CartProvider({ children }) {
       const data = await res.json();
       setCart(data.cart || { items: [], totalPrice: 0 });
       setCartCount(data.cart?.items ? data.cart.items.length : 0);
-    } catch (err) {
-      console.error("Failed to remove from cart:", err);
-    }
+    } catch (err) {}
   };
 
   const clearCart = async () => {
@@ -72,13 +92,11 @@ function CartProvider({ children }) {
       });
       setCart({ items: [], totalPrice: 0 });
       setCartCount(0);
-    } catch (err) {
-      console.error("Failed to clear cart:", err);
-    }
+    } catch (err) {}
   };
 
   return (
-    <CartContext.Provider value={{ cart, cartCount, fetchCart, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider value={{ cart, cartCount, fetchCart, addToCart, updateQuantity, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

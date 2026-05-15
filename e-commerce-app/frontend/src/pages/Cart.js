@@ -3,7 +3,8 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
 function Cart() {
-  const { cart, removeFromCart, addToCart } = useCart();
+  // 1. استدعينا updateQuantity بدل addToCart
+  const { cart, removeFromCart, updateQuantity } = useCart();
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -65,12 +66,17 @@ function Cart() {
                     <span className="chip mb-2 d-inline-block">{item.product.material}</span>
                   )}
                   <div className="qty-control">
+                    {/* 2. تعديل زرار التخفيض */}
                     <button
                       className="qty-btn"
-                      onClick={() => item.quantity === 1 ? removeFromCart(item.product._id) : addToCart(item.product._id, -1)}
+                      onClick={() => item.quantity === 1 ? removeFromCart(item.product._id) : updateQuantity(item.product._id, item.quantity - 1)}
                     >−</button>
                     <span className="qty-val">{item.quantity}</span>
-                    <button className="qty-btn" onClick={() => addToCart(item.product._id, 1)}>+</button>
+                    {/* 3. تعديل زرار التزويد */}
+                    <button 
+                      className="qty-btn" 
+                      onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
+                    >+</button>
                   </div>
                 </div>
 
