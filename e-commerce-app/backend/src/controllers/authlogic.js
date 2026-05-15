@@ -5,63 +5,11 @@ const jwt = require("jsonwebtoken");
 const PEPPER = "mysecretpepper";
 const SALT_ROUNDS = 10;
 
-// const register = (req, res) => {
-//   try {
-//     const { name, email, password } = req.body;
-
-//     const existingUser = User.find({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ msg: "User already exists" });
-//     }
-
-//     const hashedPassword = bcrypt.hashSync(password + PEPPER, SALT_ROUNDS);
-
-//     const newuser={
-//       name,
-//       email,
-//       password: hashedPassword
-//     }
-
-//     user.push(newuser);
-
-//     res.status(201).json({msg: "User registered successfully",newuser });
-
-//   } catch (err) {
-//     res.status(500).json({ msg: err.message });
-//   }
-// };
-
-// const login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     const user = User.find((user) => user.email ==req.body.email);
-//     if (!user) {
-//       return res.status(404).json({ msg: "User not found" });
-//     }
-
-//     const isMatch = bcrypt.compareSync(password + PEPPER, user.password);
-//     if (!isMatch) {
-//       return res.status(400).json({ msg: "Invalid email or password" });
-//     }
-
-//     const token = jwt.sign( { id: user._id, role: user.role },process.env.JWT_SECRET, { expiresIn: "1d" });
-
-//     res.json({msg: "Login successful",token });
-
-//   } catch (err) {
-//     res.status(500).json({ msg: err.message });
-//   }
-// };
-
-// module.exports = { register, login };
-
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // --- CASE INSENSITIVE CHECK ---
-    // The 'i' at the end makes the search ignore uppercase/lowercase
+    // bt2kd mn CASE INSENSITIVE  
     const existingUser = await User.findOne({ email: new RegExp('^' + email + '$', 'i') });
     
     if (existingUser) {
@@ -72,7 +20,6 @@ const register = async (req, res) => {
 
     const newUser = await User.create({
       name,
-      // Optional but recommended: force email to lowercase before saving to DB
       email: email.toLowerCase(), 
       password: hashedPassword,
     });
@@ -95,7 +42,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // --- CASE INSENSITIVE SEARCH ---
+    // CASE INSENSITIVE 
     const user = await User.findOne({ email: new RegExp('^' + email + '$', 'i') });
     
     if (!user) {
