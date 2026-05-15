@@ -29,6 +29,7 @@ function AuthProvider({ children }) {
   };
 
   return (
+    //ba provide el bynat dih lel childeren ely mhtago ely hwa el app content we cart 
     <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
