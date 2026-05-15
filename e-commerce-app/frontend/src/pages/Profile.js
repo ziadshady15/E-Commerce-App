@@ -14,14 +14,34 @@ function validateProfile(values) {
   } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
     errors.email = "Enter a valid email";
   }
-  if (values.password && values.password.length < 6) {
-    errors.password = "Password must be at least 6 characters";
-  }
+  
   if (values.profilePicture && !/^https?:\/\/.+/i.test(values.profilePicture)) {
     errors.profilePicture = "Must be a valid URL (starting with http or https)";
   }
+
+  // Password Validation Logic
+  if (values.oldPassword || values.newPassword || values.confirmPassword) {
+    if (!values.oldPassword) {
+      errors.oldPassword = "Current password is required to set a new one";
+    }
+    
+    if (!values.newPassword) {
+      errors.newPassword = "New password is required";
+    } else if (values.newPassword.length < 6) {
+      errors.newPassword = "Password must be at least 6 characters";
+    } else if (values.newPassword === values.oldPassword) {
+      // 👇 NEW CHECK ADDED HERE
+      errors.newPassword = "New password cannot be the same as the current password";
+    }
+    
+    if (values.confirmPassword !== values.newPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+  }
+
   return errors;
 }
+
 
 const STATUS_CLASS = {
   pending:    "badge-pending",
@@ -63,7 +83,9 @@ function Profile() {
       formik.setValues({
         name: data.name || "",
         email: data.email || "",
-        password: "",
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
         profilePicture: data.profilePicture || "",
       });
     } catch (err) {
@@ -87,27 +109,43 @@ function Profile() {
   };
 
   const formik = useFormik({
-    initialValues: { name: "", email: "", password: "", profilePicture: "" },
+    initialValues: { name: "", email: "", oldPassword: "", newPassword: "", confirmPassword: "", profilePicture: "" },
     validate: validateProfile,
-    onSubmit: async (values, { setStatus, setSubmitting }) => {
+
+    onSubmit: async (values, { setStatus, setSubmitting, setValues }) => {
       setStatus(null);
       try {
         const body = { name: values.name, email: values.email };
-        if (values.password) body.password = values.password;
         if (values.profilePicture) body.profilePicture = values.profilePicture;
+        
+        // Only send password data if the user is trying to change it
+        if (values.newPassword) {
+          body.oldPassword = values.oldPassword;
+          body.newPassword = values.newPassword;
+        }
 
         const res = await fetch(`${API_URL}/users/profile`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify(body),
         });
+        
         if (!res.ok) {
           const data = await res.json();
           setStatus(data.message || "Update failed");
           return;
         }
+        
         setToast({ message: "Profile updated successfully!", type: "success" });
-        formik.setFieldValue("password", "");
+        
+        // Clear password fields all at once to prevent validation flashing
+        setValues({
+          ...values,
+          oldPassword: "",
+          newPassword: "",
+          confirmPassword: ""
+        });
+        
         fetchProfile();
       } catch (err) {
         setStatus("Network error. Please try again.");
@@ -283,23 +321,6 @@ function Profile() {
                     </div>
                   )}
 
-                  {/* Profile Picture URL */}
-                  <div className="mb-3">
-                    <label className="af-label">Profile Picture URL</label>
-                    <input
-                      type="text"
-                      name="profilePicture"
-                      className={`af-input ${formik.touched.profilePicture && formik.errors.profilePicture ? "is-invalid" : ""}`}
-                      value={formik.values.profilePicture}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      placeholder="https://example.com/photo.jpg"
-                    />
-                    {formik.touched.profilePicture && formik.errors.profilePicture && (
-                      <p className="af-error">{formik.errors.profilePicture}</p>
-                    )}
-                  </div>
-
                   {/* Name */}
                   <div className="mb-3">
                     <label className="af-label">Full Name</label>
@@ -333,19 +354,53 @@ function Profile() {
                   </div>
 
                   {/* New Password */}
-                  <div className="mb-4">
-                    <label className="af-label">New Password (leave blank to keep current)</label>
+                  <div className="mb-3">
+                    <label className="af-label">Current Password</label>
                     <input
                       type="password"
-                      name="password"
-                      className={`af-input ${formik.touched.password && formik.errors.password ? "is-invalid" : ""}`}
-                      value={formik.values.password}
+                      name="oldPassword"
+                      className={`af-input ${formik.touched.oldPassword && formik.errors.oldPassword ? "is-invalid" : ""}`}
+                      value={formik.values.oldPassword}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      placeholder="••••••••"
+                      placeholder="Enter current password"
                     />
-                    {formik.touched.password && formik.errors.password && (
-                      <p className="af-error">{formik.errors.password}</p>
+                    {formik.touched.oldPassword && formik.errors.oldPassword && (
+                      <p className="af-error">{formik.errors.oldPassword}</p>
+                    )}
+                  </div>
+
+                  {/* New Password */}
+                  <div className="mb-3">
+                    <label className="af-label">New Password</label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      className={`af-input ${formik.touched.newPassword && formik.errors.newPassword ? "is-invalid" : ""}`}
+                      value={formik.values.newPassword}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="Enter new password"
+                    />
+                    {formik.touched.newPassword && formik.errors.newPassword && (
+                      <p className="af-error">{formik.errors.newPassword}</p>
+                    )}
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div className="mb-4">
+                    <label className="af-label">Confirm New Password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      className={`af-input ${formik.touched.confirmPassword && formik.errors.confirmPassword ? "is-invalid" : ""}`}
+                      value={formik.values.confirmPassword}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="Confirm new password"
+                    />
+                    {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                      <p className="af-error">{formik.errors.confirmPassword}</p>
                     )}
                   </div>
 
