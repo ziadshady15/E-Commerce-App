@@ -60,7 +60,10 @@ const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    // --- CASE INSENSITIVE CHECK ---
+    // The 'i' at the end makes the search ignore uppercase/lowercase
+    const existingUser = await User.findOne({ email: new RegExp('^' + email + '$', 'i') });
+    
     if (existingUser) {
       return res.status(400).json({ msg: "User already exists" });
     }
@@ -69,7 +72,8 @@ const register = async (req, res) => {
 
     const newUser = await User.create({
       name,
-      email,
+      // Optional but recommended: force email to lowercase before saving to DB
+      email: email.toLowerCase(), 
       password: hashedPassword,
     });
 
@@ -91,7 +95,9 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // --- CASE INSENSITIVE SEARCH ---
+    const user = await User.findOne({ email: new RegExp('^' + email + '$', 'i') });
+    
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
