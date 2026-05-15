@@ -14,5 +14,5 @@ function AdminRoute() {
   return <Outlet />;
 }
 
-// Named exports — required by App.js
+
 export { ProtectedRoute, AdminRoute }
