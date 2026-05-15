@@ -196,7 +196,7 @@ function Profile() {
               <div className="row g-3 mb-4">
                 {[
                   { label: "Orders Placed", value: orders.length,        badge: "ACTIVE" },
-                  { label: "Total Spent",   value: `$${orders.reduce((s, o) => s + o.totalPrice, 0).toFixed(0)}`, badge: "TOTAL" },
+                  { label: "Total Spent",   value: `${orders.reduce((s, o) => s + o.totalPrice, 0).toFixed(0)} EGP`, badge: "TOTAL" },
                   { label: "Membership",    value: profile?.role === "admin" ? "Admin" : "Gold", badge: "TIER" },
                 ].map((stat) => (
                   <div className="col-12 col-sm-4" key={stat.label}>
@@ -242,7 +242,7 @@ function Profile() {
                             <span className={`status-badge ${STATUS_CLASS[order.status] || ""}`}>{order.status}</span>
                           </div>
                         </div>
-                        <strong>${order.totalPrice.toFixed(2)}</strong>
+                        <strong>{order.totalPrice.toFixed(2)} EGP</strong>
                       </div>
                     </div>
                   ))
@@ -276,7 +276,7 @@ function Profile() {
                         <small className="text-muted">Placed {formatDate(order.createdAt)}</small>
                       </div>
                       <div className="text-end">
-                        <strong>${order.totalPrice.toFixed(2)}</strong><br />
+                        <strong>{order.totalPrice.toFixed(2)} EGP</strong><br />
                         <span className={`status-badge ${STATUS_CLASS[order.status] || ""}`}>{order.status}</span>
                       </div>
                     </div>
@@ -284,7 +284,7 @@ function Profile() {
                     {order.items.map((item, i) => (
                       <div key={i} className="d-flex justify-content-between mb-1">
                         <small className="text-muted">{item.product?.name || "Frame"} × {item.quantity}</small>
-                        <small>${(item.price * item.quantity).toFixed(2)}</small>
+                        <small>{(item.price * item.quantity).toFixed(2)} EGP</small>
                       </div>
                     ))}
                     {order.shippingAddress && (

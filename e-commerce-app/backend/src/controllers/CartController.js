@@ -2,7 +2,8 @@ const Cart = require('../models/Cart');
 
 const getCart = async (req, res, next) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id }).populate('items.product', 'name price image');
+    // 1. Added 'stock' and 'material' here
+    const cart = await Cart.findOne({ user: req.user._id }).populate('items.product', 'name price image stock material');
       
     if (!cart) return res.status(200).json({ items: [], totalPrice: 0 });
 
@@ -41,7 +42,8 @@ const addToCart = async (req, res, next) => {
       await cart.save();
     }
 
-    await cart.populate('items.product', 'name price image');
+    // 2. Added 'stock' and 'material' here
+    await cart.populate('items.product', 'name price image stock material');
     
     const totalPrice = cart.items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
 
@@ -69,7 +71,10 @@ const updateQuantity = async (req, res, next) => {
     if (itemIndex > -1) {
       cart.items[itemIndex].quantity = quantity;
       await cart.save();
-      await cart.populate('items.product', 'name price image');
+
+      // 3. Added 'stock' and 'material' here
+      await cart.populate('items.product', 'name price image stock material');
+      
       const totalPrice = cart.items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
       res.status(200).json({ _id: cart._id, user: cart.user, items: cart.items, totalPrice: totalPrice });
     } else {
@@ -88,7 +93,9 @@ const removeFromCart = async (req, res, next) => {
     cart.items = cart.items.filter((i) => i.product.toString() !== req.params.productId);
     await cart.save();
 
-    await cart.populate('items.product', 'name price image');
+    // 4. Added 'stock' and 'material' here
+    await cart.populate('items.product', 'name price image stock material');
+    
     const totalPrice = cart.items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
 
     res.status(200).json({ 

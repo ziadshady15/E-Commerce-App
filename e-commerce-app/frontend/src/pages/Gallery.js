@@ -37,7 +37,6 @@ function Gallery() {
     setSearchTyped(searchQuery);
   }, []); // eslint-disable-line
 
-  // ✅ Single parallel fetch — runs ONCE on mount
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -68,7 +67,6 @@ function Gallery() {
     setSearchParams(newParams, { replace: true });
   };
 
-  // ✅ Client-side filter + sort — no network calls
   const finalProducts = useMemo(() => {
     let list = [...allProducts];
 
@@ -252,8 +250,8 @@ function Gallery() {
                         src={p.image}
                         className="card-img-top"
                         alt={p.name}
-                        loading="lazy"                  // ✅ lazy load
-                        decoding="async"                // ✅ non-blocking decode
+                        loading="lazy"                 
+                        decoding="async"               
                         style={{ height: "280px", objectFit: "cover" }}
                       />
                     </div>

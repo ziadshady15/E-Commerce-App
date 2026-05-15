@@ -6,12 +6,16 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-const SIZES   = ["8x10", "11x14", "16x20", "24x36"];
-const MATTING = ["None", "Single", "Double"];
 
 function validateReview(values) {
   const errors = {};
   if (!values.rating || values.rating < 1) errors.rating = "Please select a rating";
+  
+  // ADD THIS: Check if comment is empty or just spaces
+  if (!values.comment || !values.comment.trim()) {
+    errors.comment = "Please write a comment";
+  }
+  
   return errors;
 }
 
@@ -45,8 +49,6 @@ function ProductDetail() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedSize, setSelectedSize] = useState("16x20");
-  const [selectedMatting, setSelectedMatting] = useState("Single");
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState(null);
 
@@ -162,7 +164,8 @@ function ProductDetail() {
           <div className="col-12 col-md-6">
             <span className="eyebrow">{product.category?.name || "Frame"}</span>
             <h2 className="serif mb-2">{product.name}</h2>
-            <p style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: 12 }}>${product.price}</p>
+            {/* Changed from $ to EGP here */}
+            <p style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: 12 }}>EGP {product.price}</p>
 
             {avgRating && (
               <div className="d-flex align-items-center gap-2 mb-3">
@@ -173,28 +176,8 @@ function ProductDetail() {
 
             <hr style={{ borderColor: "var(--border)" }} />
 
-            {/* Size */}
-            <p className="af-label mt-3">Frame Size</p>
-            <div className="d-flex flex-wrap gap-2 mb-3">
-              {SIZES.map((s) => (
-                <button key={s} className={`toggle-btn ${selectedSize === s ? "active" : ""}`} onClick={() => setSelectedSize(s)}>
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            {/* Matting */}
-            <p className="af-label">Matting Style</p>
-            <div className="d-flex gap-2 mb-3">
-              {MATTING.map((m) => (
-                <button key={m} className={`toggle-btn ${selectedMatting === m ? "active" : ""}`} onClick={() => setSelectedMatting(m)}>
-                  {m}
-                </button>
-              ))}
-            </div>
-
             {/* Stock */}
-            <p className="mb-3">
+            <p className="mb-3 mt-3">
               <span className={`chip ${product.stock > 0 ? "" : "chip-dark"}`}>
                 {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
               </span>
@@ -206,7 +189,7 @@ function ProductDetail() {
               disabled={adding || product.stock === 0}
             >
               <i className="bi bi-bag me-2"></i>
-              {adding ? "Adding..." : product.stock === 0 ? "Out of Stock" : "Add to Collection"}
+              {adding ? "Adding..." : product.stock === 0 ? "Out of Stock" : "Add to Cart"}
             </button>
 
             <div className="d-flex justify-content-center gap-4 mt-2">
@@ -282,16 +265,23 @@ function ProductDetail() {
                   </div>
 
                   <div className="mb-3">
-                    <label className="af-label">Comment (optional)</label>
-                    <textarea
-                      name="comment"
-                      className="af-input"
-                      rows={4}
-                      value={reviewFormik.values.comment}
-                      onChange={reviewFormik.handleChange}
-                      placeholder="Share your experience..."
-                    />
-                  </div>
+                  <label className="af-label">Comment *</label> 
+                  <textarea
+                    name="comment"
+                    className="af-input"
+                    rows={4}
+                    value={reviewFormik.values.comment}
+                    onChange={reviewFormik.handleChange}
+                    onBlur={reviewFormik.handleBlur} /* ADDED THIS */
+                    placeholder="Share your experience..."
+                  />
+                  {/* ADDED THIS: Display the error message */}
+                  {reviewFormik.touched.comment && reviewFormik.errors.comment && (
+                    <p className="af-error" style={{ color: "red", fontSize: "0.85rem", marginTop: "4px" }}>
+                      {reviewFormik.errors.comment}
+                    </p>
+                  )}
+                </div>
 
                   <button type="submit" className="btn-af" disabled={reviewFormik.isSubmitting}>
                     {reviewFormik.isSubmitting ? "Submitting..." : "Submit Review"}

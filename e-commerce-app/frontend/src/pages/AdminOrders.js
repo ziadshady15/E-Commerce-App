@@ -134,7 +134,7 @@ function AdminOrders() {
                 {/* Total */}
                 <div className="col-6 col-sm-2">
                   <strong style={{ fontSize: "0.88rem" }}>
-                    ${order.totalPrice?.toFixed(2)}
+                    {order.totalPrice?.toFixed(2)} EGP
                   </strong>
                 </div>
 
@@ -153,7 +153,12 @@ function AdminOrders() {
                     className="af-input"
                     style={{ fontSize: "0.78rem", padding: "6px 10px" }}
                     value={order.status}
-                    disabled={updatingId === order._id}
+                    // UPDATE THIS LINE:
+                    disabled={
+                      updatingId === order._id || 
+                      order.status === "delivered" || 
+                      order.status === "cancelled"
+                    }
                     onChange={(e) => handleStatusChange(order._id, e.target.value)}
                   >
                     {STATUS_OPTIONS.map((s) => (
@@ -171,7 +176,7 @@ function AdminOrders() {
                   {order.items.map((item, idx) => (
                     <small key={idx} className="text-muted d-block">
                       • {item.product?.name || "Frame"} × {item.quantity} —{" "}
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {(item.price * item.quantity).toFixed(2)} EGP
                     </small>
                   ))}
                 </div>

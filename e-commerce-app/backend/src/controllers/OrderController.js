@@ -1,5 +1,6 @@
 const Order = require('../models/Orders');
 const Cart  = require('../models/Cart');
+const Product = require('../models/Product'); // <-- ADD THIS: Import the Product model
 
 const checkout = async (req, res, next) => {
   try {
@@ -22,7 +23,7 @@ const checkout = async (req, res, next) => {
      const item      = orderItems[i];
      const itemTotal = item.price * item.quantity;
      totalPrice      = totalPrice + itemTotal;
-    } //bazawd kol el prices 3ala ba3d
+    } 
 
     const order = await Order.create({ user: req.user._id, items: orderItems, totalPrice, shippingAddress });
     await Cart.findOneAndDelete({ user: req.user._id }); //nemsah el user cart ba3d ma el order et3amal
@@ -61,10 +62,26 @@ const updateOrderStatus = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'Order not found' });
-    order.status = req.body.status || order.status; //update status law fe wahed gdeed, law mafesh aseb ely mawgod
+    
+    const newStatus = req.body.status || order.status;
+
+    if (newStatus === 'delivered' && order.status !== 'delivered') {
+      for (const item of order.items) {
+        const product = await Product.findById(item.product);
+        if (product) {
+          product.stock = Math.max(0, product.stock - item.quantity);
+          await product.save();
+        }
+      }
+    }
+
+
+    order.status = newStatus; //update status law fe wahed gdeed, law mafesh aseb ely mawgod
     const updated = await order.save();
     res.status(200).json(updated);
-  } catch (error) { next(error); }
+  } catch (error) { 
+    next(error); 
+  }
 };
 
 module.exports = { checkout, getMyOrders, getAllOrders, updateOrderStatus };

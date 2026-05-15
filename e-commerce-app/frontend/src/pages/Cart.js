@@ -3,7 +3,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
 function Cart() {
-  // 1. استدعينا updateQuantity بدل addToCart
+  
   const { cart, removeFromCart, updateQuantity } = useCart();
   const { token } = useAuth();
   const navigate = useNavigate();
@@ -34,7 +34,8 @@ function Cart() {
 
   const subtotal = cart.totalPrice || 0;
   const tax      = subtotal * 0.08;
-  const total    = subtotal + tax;
+  const shipping = subtotal > 500 ? 0 : 80;
+  const total    = subtotal + tax + shipping;
 
   return (
     <div className="container py-4 py-md-5">
@@ -76,6 +77,12 @@ function Cart() {
                     <button 
                       className="qty-btn" 
                       onClick={() => updateQuantity(item.product._id, item.quantity + 1)}
+                      // ADDED THIS: Disable button if quantity reaches the stock limit
+                      disabled={item.quantity >= item.product?.stock}
+                      style={{ 
+                        opacity: item.quantity >= item.product?.stock ? 0.5 : 1, 
+                        cursor: item.quantity >= item.product?.stock ? "not-allowed" : "pointer" 
+                      }}
                     >+</button>
                   </div>
                 </div>
@@ -106,10 +113,15 @@ function Cart() {
               <small>Subtotal</small>
               <small>{subtotal.toFixed(2)} EGP</small>
             </div>
+
+            {/* Updated Shipping Row */}
             <div className="d-flex justify-content-between mb-2">
               <small>Estimated Shipping</small>
-              <small>Free</small>
+              <small className={shipping === 0 ? "text-success fw-bold" : ""}>
+                {shipping === 0 ? "Free" : `${shipping.toFixed(2)} EGP`}
+              </small>
             </div>
+
             <div className="d-flex justify-content-between mb-2">
               <small>Tax (8%)</small>
               <small>{tax.toFixed(2)} EGP</small>
@@ -122,13 +134,18 @@ function Cart() {
               <strong>{total.toFixed(2)} EGP</strong>
             </div>
 
+            {/* Optional: Add a "Free Shipping" progress hint */}
+            {subtotal <= 500 && (
+              <p className="text-muted text-center" style={{ fontSize: "0.75rem" }}>
+                Add <strong>{(500 - subtotal).toFixed(2)} EGP</strong> more for <b>Free Shipping</b>!
+              </p>
+            )}
+
             <button className="btn-af w-100" onClick={() => navigate("/checkout")}>
               Proceed to Checkout →
             </button>
-
-            <div className="mt-3 p-3" style={{ background: "var(--cream)", border: "1px solid var(--border)", fontSize: "0.78rem" }}>
-              🏛️ Every frame is inspected by our senior curators before shipping.
-            </div>
+            
+            {/* ... rest of your code */}
           </div>
         </div>
       </div>

@@ -26,9 +26,10 @@ function Checkout() {
 
   const items    = cart.items || [];
   const subtotal = cart.totalPrice || 0;
-  const fee      = delivery === "white-glove" ? 45 : 0;
-  const tax      = subtotal * 0.08;
-  const total    = subtotal + fee + tax;
+  const standardFee = subtotal > 500 ? 0 : 80;
+  const fee = delivery === "fast-delivery" ? 100 : standardFee;
+  const tax   = subtotal * 0.08;
+  const total = subtotal + fee + tax;
 
   const formik = useFormik({
     initialValues: { firstName: "", lastName: "", street: "", city: "", country: "Egypt" },
@@ -175,13 +176,22 @@ function Checkout() {
                 </div>
               </div>
             </div>
-
             {/* Delivery */}
             <div className="af-card p-4">
               <h5 className="serif mb-3">Delivery Method</h5>
               {[
-                { value: "standard",   label: "Standard Shipping",   sub: "5–7 Business Days",                   price: "Free" },
-                { value: "white-glove", label: "White Glove Delivery", sub: "2–3 Business Days · Insured",         price: "45.00 EGP" },
+                { 
+                  value: "standard",   
+                  label: "Standard Shipping",   
+                  sub: "5–7 Business Days",                   
+                  price: standardFee === 0 ? "Free" : `${standardFee.toFixed(2)} EGP` 
+                },
+                { 
+                  value: "fast-delivery", 
+                  label: "Fast Delivery", 
+                  sub: "1–2 Business Days · Priority Handled", 
+                  price: "100.00 EGP" 
+                },
               ].map((opt) => (
                 <label
                   key={opt.value}

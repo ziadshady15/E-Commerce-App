@@ -50,7 +50,7 @@ function AdminOverview() {
     { label: "Total Products", value: products.length, icon: "bi-box-seam",        bg: "#e8f4fd", color: "#1565c0" },
     { label: "Total Orders",   value: orders.length,   icon: "bi-bag-check",       bg: "#e8f5e9", color: "#2e7d32" },
     { label: "Total Users",    value: users.length,    icon: "bi-people",          bg: "#f3e5f5", color: "#6a1b9a" },
-    { label: "Revenue",        value: `$${totalRevenue.toFixed(0)}`, icon: "bi-currency-dollar", bg: "#fff3e0", color: "#e65100" },
+    { label: "Revenue",        value: `${totalRevenue.toFixed(0)} EGP`, icon: "bi-currency-dollar", bg: "#fff3e0", color: "#e65100" },
   ];
 
   if (error){
@@ -108,7 +108,7 @@ function AdminOverview() {
                   <small className="text-muted">{userName}</small>
                 </div>
                 <div className="text-end">
-                  <p className="mb-0" style={{ fontWeight: 600, fontSize: "0.88rem" }}>${order.totalPrice.toFixed(2)}</p>
+                  <p className="mb-0" style={{ fontWeight: 600, fontSize: "0.88rem" }}>{order.totalPrice.toFixed(2)} EGP</p>
                   <small className="text-muted">{order.status}</small>
                 </div>
               </div>
