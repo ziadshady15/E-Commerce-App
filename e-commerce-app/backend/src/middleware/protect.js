@@ -20,7 +20,7 @@ const protect = async (req, res, next) => {
     }
 
     next();
-  } catch (error) {//kan fe error bsbb el eslint fa claude 2aly 23ml el config.js file dah
+  } catch (error) {
     return res.status(401).json({ message: 'Not authorized, invalid token' });
   }
 };
