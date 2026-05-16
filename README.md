@@ -10,8 +10,8 @@ This project was built to provide a seamless, highly secure shopping experience 
 **Active / MVP Complete.** The RESTful API and core frontend integrations are fully operational. Current focus is on UI polish and final deployment preparations.
 
 ## Screenshots
-![main landing](./frontend/public/main.jpeg)
-![admin dashboard](./frontend/public/admin.jpeg)
+![main landing](e-commerce-app/frontend/public/main.jpeg)
+![admin dashboard](e-commerce-app/frontend/public/admin.jpeg)
 ## Tech / Framework Used
 
 **Frontend Ecosystem:**
