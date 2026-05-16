@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
-// Status badge CSS classes (same as Profile.js)
+// Status badge CSS classes 
 const STATUS_CLASS = {
   pending:    "badge-pending",
   processing: "badge-processing",
@@ -13,7 +13,7 @@ const STATUS_CLASS = {
   cancelled:  "badge-cancelled",
 };
 
-// All possible order statuses the admin can set
+// All possible order statuses
 const STATUS_OPTIONS = ["pending", "processing", "shipped", "delivered", "cancelled"];
 
 function AdminOrders() {
@@ -23,7 +23,7 @@ function AdminOrders() {
   const [error, setError]     = useState(null);
   const [toast, setToast]     = useState(null);
 
-  // Which order is being updated right now (to show loading on that row)
+  // anhy order
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
@@ -39,7 +39,13 @@ function AdminOrders() {
       });
       if (!res.ok) throw new Error("Failed to load orders");
       const data = await res.json();
-      setOrders(Array.isArray(data) ? data : []);
+      //3lshan lw data=null y3ml crash lw ma kansh array
+      if (Array.isArray(data)) {
+        setOrders(data);
+      } 
+      else {
+        setOrders([]);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -59,10 +65,11 @@ function AdminOrders() {
         },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!res.ok) throw new Error("Failed to update status");
+      if (!res.ok) 
+        throw new Error("Failed to update status");
       setToast({ message: "Order status updated!", type: "success" });
-      // Update the order in local state so UI refreshes immediately
       setOrders((prev) =>
+        //8yr el status fel order elly et3ml update bs w5ly ba2y el orders zay ma homa
         prev.map((o) => (o._id === orderId ? { ...o, status: newStatus } : o))
       );
     } catch (err) {
@@ -153,7 +160,6 @@ function AdminOrders() {
                     className="af-input"
                     style={{ fontSize: "0.78rem", padding: "6px 10px" }}
                     value={order.status}
-                    // UPDATE THIS LINE:
                     disabled={
                       updatingId === order._id || 
                       order.status === "delivered" || 
